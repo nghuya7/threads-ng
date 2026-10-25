@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <title>Chuyển tiếp đăng nhập Threads</title>
+  <style>
+    :root { --bg:#fff; --fg:#1a1a1a; --muted:#666; --link:#0a58ca; }
+    @media (prefers-color-scheme: dark) { :root { --bg:#121212; --fg:#f0f0f0; --muted:#a0a0a0; --link:#6ea8fe; } }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; background:var(--bg); color:var(--fg);
+           font:16px/1.5 system-ui, sans-serif; padding:16px; }
+    main { max-width:28rem; }
+    p { color:var(--muted); }
+    a { color:var(--link); }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Đang chuyển về ứng dụng…</h1>
+  <p id="msg">Nếu trang không tự chuyển, hãy bảo đảm ứng dụng Video Publisher đang chạy trên máy này.</p>
+  <p><a id="manual" hidden>Bấm vào đây để tiếp tục</a></p>
+</main>
+<script>
+  // Trang này chỉ chuyển tiếp kết quả đăng nhập Threads về ứng dụng đang chạy trên CHÍNH MÁY NGƯỜI DÙNG.
+  // Đích cố định là localhost, không nhận đích từ tham số nên không thể bị lợi dụng chuyển hướng sang nơi khác.
+  var TARGET = "http://localhost:8000/api/v1/social-accounts/threads/callback";
+  var ALLOWED = ["code", "state", "error", "error_reason", "error_description"];
+
+  var incoming = new URLSearchParams(window.location.search);
+  var outgoing = new URLSearchParams();
+  ALLOWED.forEach(function (k) {
+    if (incoming.has(k)) outgoing.set(k, incoming.get(k));
+  });
+
+  if (!outgoing.has("code") && !outgoing.has("error")) {
+    document.querySelector("h1").textContent = "Không có dữ liệu đăng nhập";
+    document.getElementById("msg").textContent =
+      "Hãy quay lại ứng dụng Video Publisher và bấm “Kết nối Threads” để bắt đầu.";
+  } else {
+    var url = TARGET + "?" + outgoing.toString();
+    var link = document.getElementById("manual");
+    link.href = url;
+    link.hidden = false;
+    window.location.replace(url);
+  }
+</script>
+</body>
+</html>
