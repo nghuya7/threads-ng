@@ -25,11 +25,18 @@
 <script>
   // Trang này chỉ chuyển tiếp kết quả đăng nhập Threads về ứng dụng đang chạy trên CHÍNH MÁY NGƯỜI DÙNG.
   // Đích cố định là localhost, không nhận đích từ tham số nên không thể bị lợi dụng chuyển hướng sang nơi khác.
-  var TARGET = "http://localhost:8000/api/v1/social-accounts/threads/callback";
+  var BASE = "http://localhost:8000/api/v1/social-accounts/";
+  // Tiền tố của `state` cho biết kết quả đăng nhập thuộc nền tảng nào (state không tiền tố = Threads).
+  var ROUTES = { "fb.": BASE + "facebook/callback", "ig.": BASE + "instagram/callback" };
+  var TARGET = BASE + "threads/callback";
   var ALLOWED = ["code", "state", "error", "error_reason", "error_description"];
 
   var incoming = new URLSearchParams(window.location.search);
   var outgoing = new URLSearchParams();
+  var stateValue = incoming.get("state") || "";
+  Object.keys(ROUTES).forEach(function (prefix) {
+    if (stateValue.indexOf(prefix) === 0) TARGET = ROUTES[prefix];
+  });
   ALLOWED.forEach(function (k) {
     if (incoming.has(k)) outgoing.set(k, incoming.get(k));
   });
